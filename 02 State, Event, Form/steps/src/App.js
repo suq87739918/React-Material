@@ -37,26 +37,60 @@ function App() {
             <div className={`${step >= 3 ? "active" : ""}`}>3</div>
           </div>
 
-          <p className="message">
-            Step {step} : {messages[step - 1]}
-          </p>
+          {/* <p className="message">
+            <h3>
+              Step {step} : {messages[step - 1]}
+            </h3>
+          </p> */}
+
+          <StepMessage step={step}>{messages[step - 1]}</StepMessage>
+
           <div className="buttons">
-            <button
-              style={{ backgroundColor: "#7950f2", color: "#fff" }}
+            <Button
+              textColor="#fff"
+              bgColor="#7950f2"
               onClick={handlePrevious}
+              // text="Previous"
+              // emoji="👈"
             >
-              Previous
-            </button>
-            <button
-              style={{ backgroundColor: "#7950f2", color: "#fff" }}
+              <span>👈</span> Previous
+            </Button>
+            <Button
+              textColor="#fff"
+              bgColor="#7950f2"
               onClick={handleNext}
+              // text="Next"
+              // emoji="👉"
             >
-              Next
-            </button>
+              {/* 这部分就是Button组件标签之间的内容，会被作为children传递 */}
+              Next <span>👉</span>
+            </Button>
           </div>
         </div>
       )}
     </>
+  );
+}
+
+function StepMessage({ step, children }) {
+  return (
+    <div className="message">
+      <h3>Step {step}</h3>
+      {children}
+    </div>
+  );
+}
+
+function Button({ textColor, bgColor, onClick, children }) {
+  // children 是一个特殊的 prop（属性），用于传递组件标签之间的内容。这是 React 组件模型的一个重要特性，因为它允许我们将组件组合在一起，形成更复杂的 UI 结构。
+  // 当一个组件有开标签和闭标签，并且标签之间有内容时，这些内容会作为 children prop 自动传递给该组件。
+  return (
+    <button
+      style={{ backgroundColor: bgColor, color: textColor }}
+      onClick={onClick}
+    >
+      {children}
+    </button>
   );
 }
 
