@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import ReactDOM from "react-dom/client";
 import FriendList from "./FriendList";
 import Button from "./Button";
 import FormAddFriend from "./FormAddFriend";
