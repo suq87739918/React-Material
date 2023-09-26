@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 const tempMovieData = [
   {
@@ -50,75 +50,6 @@ const tempWatchedData = [
 const average = (arr) =>
   arr.reduce((acc, cur, i, arr) => acc + cur / arr.length, 0);
 
-const KEY = "d4b9e1cb";
-
-export default function App() {
-  const [movies, setMovies] = useState([]);
-  const [watched, setWatched] = useState([]);
-  const [isLoading, setIsLoading] = useState(false);
-
-  // fetch直接写在会有state change的地方是不允许的，因为fetch会触发state change，然后整个function会rerender，然后fetch又会触发state change，这就是infinite loop了
-  // 为了避免这个情况，需要把这部分写在useEffect下
-  // fetch(`http://www.omdbapi.com/?apikey=${KEY}&s=interstellar`)
-  //   .then((res) => res.json())
-  //   .then((data) => console.log(data));
-
-  // 第一种写法 使用链式 .then() 方法处理 fetch 返回的 Promise。
-  // 第二种写法 使用了 async/await 语法来处理 Promise, 使用 async/await 时，你可以使用标准的 try/catch 语句来捕获错误，这使得错误处理更加直观。如果你有多个依赖于先前结果的异步操作，使用 async/await 可以帮助你避免深层嵌套的 .then() 结构，也称为 "回调地狱"。
-  // useEffect(function () {
-  //   fetch(`http://www.omdbapi.com/?apikey=${KEY}&s=interstellar`)
-  //     .then((res) => res.json())
-  //     .then((data) => setMovies(data.Search));
-  // }, []);
-
-  useEffect(function () {
-    async function fetchMovies() {
-      setIsLoading(true);
-      const res = await fetch(
-        `http://www.omdbapi.com/?apikey=${KEY}&s=interstellar`
-      );
-      const data = await res.json();
-      setMovies(data.Search);
-      setIsLoading(false);
-    }
-    fetchMovies();
-  }, []);
-
-  return (
-    <>
-      <NavBar>
-        <Logo />
-        <Search />
-        <NumResult movies={movies} />
-      </NavBar>
-      <Main>
-        {/* <ElementBox element={<MovieList movies={movies} />} />
-        <ElementBox
-          element={
-            <div>
-              <WatchedSummary watched={watched} />
-              <WatchedList watched={watched} />
-            </div>
-          }
-        /> */}
-        {/* 用一个可重复利用的Box来render两个不用的box，内容用children传递 */}
-        <Box>
-          {isLoading ? <Loader></Loader> : <MovieList movies={movies} />}
-        </Box>
-
-        <Box>
-          <WatchedSummary watched={watched} />
-          <WatchedList watched={watched} />
-        </Box>
-      </Main>
-    </>
-  );
-}
-
-function Loader() {
-  return <p className="loader">Loading...</p>;
-}
-
 function NavBar({ children }) {
   return <nav className="nav-bar">{children}</nav>;
 }
@@ -155,6 +86,40 @@ function Search() {
 
 function Main({ children }) {
   return <main className="main">{children}</main>;
+}
+
+export default function App() {
+  const [movies, setMovies] = useState(tempMovieData);
+  const [watched, setWatched] = useState(tempWatchedData);
+  return (
+    <>
+      <NavBar>
+        <Logo />
+        <Search />
+        <NumResult movies={movies} />
+      </NavBar>
+      <Main>
+        {/* <ElementBox element={<MovieList movies={movies} />} />
+        <ElementBox
+          element={
+            <div>
+              <WatchedSummary watched={watched} />
+              <WatchedList watched={watched} />
+            </div>
+          }
+        /> */}
+        {/* 用一个可重复利用的Box来render两个不用的box，内容用children传递 */}
+        <Box>
+          <MovieList movies={movies} />
+        </Box>
+
+        <Box>
+          <WatchedSummary watched={watched} />
+          <WatchedList watched={watched} />
+        </Box>
+      </Main>
+    </>
+  );
 }
 
 function Box({ children }) {
