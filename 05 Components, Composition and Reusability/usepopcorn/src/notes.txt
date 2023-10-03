@@ -1,0 +1,12 @@
+useEffect(fn, [a,b,c]):
+    Effect will synchronized with a,b and c.
+    runs on mount and rerenders triggered by updating a,b or c
+
+useEffect(fn, []):
+    Effect will synchronized with no states or props.
+    run only on mount(at initial render)
+    因为dependency是空的array，所以这个Effect不会收到re-render的影响，只会在第一次render时被运行
+
+useEffect(fn):
+    Effect will synchronized on everything.
+    run on every render, which is bad
