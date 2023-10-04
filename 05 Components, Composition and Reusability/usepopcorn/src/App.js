@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import StarRating from "./StarRating";
 
 const tempMovieData = [
   {
@@ -321,6 +322,7 @@ function WatchedList({ watched }) {
 
 function MovieDetails({ selectedID, onCloseMovie }) {
   const [movie, setMovies] = useState({});
+  const [isLoading, setIsLoading] = useState(false);
 
   const {
     Title: title,
@@ -335,44 +337,59 @@ function MovieDetails({ selectedID, onCloseMovie }) {
     Genre: genre,
   } = movie;
 
-  useEffect(function () {
-    async function getMovieDetails() {
-      const res = await fetch(
-        `http://www.omdbapi.com/?apikey=${KEY}&i=${selectedID}`
-      );
-      const data = await res.json();
-      setMovies(data);
-    }
-    getMovieDetails();
-  }, []);
+  useEffect(
+    function () {
+      async function getMovieDetails() {
+        setIsLoading(true);
+        const res = await fetch(
+          `http://www.omdbapi.com/?apikey=${KEY}&i=${selectedID}`
+        );
+        const data = await res.json();
+        setMovies(data);
+        setIsLoading(false);
+      }
+      getMovieDetails();
+    },
+    [selectedID]
+  );
 
   return (
     <div className="details">
-      <header>
-        <button className="btn-back" onClick={onCloseMovie}>
-          &larr;
-        </button>
-        <img src={poster} alt={`poster of ${movie} movie`}></img>
-        <div className="details-overview">
-          <h2>{title}</h2>
-          <p>
-            {released} &bull: {runtime}
-          </p>
-          <p>{genre}</p>
-          <p>
-            <span>⭐️</span>
-            {imdbRating} IMDb rating
-          </p>
-        </div>
-      </header>
-      <section>
-        <p>
-          <em>{plot}</em>
-        </p>
-        <p>Starring {actors}</p>
-        <p>Directed by {director}</p>
-      </section>
-      {selectedID}
+      {isLoading ? (
+        <Loader />
+      ) : (
+        <>
+          <header>
+            <button className="btn-back" onClick={onCloseMovie}>
+              &larr;
+            </button>
+            <img src={poster} alt={`poster of ${movie} movie`}></img>
+            <div className="details-overview">
+              <h2>{title}</h2>
+              <p>
+                {released} &bull: {runtime}
+              </p>
+              <p>{genre}</p>
+              <p>
+                <span>⭐️</span>
+                {imdbRating} IMDb rating
+              </p>
+            </div>
+          </header>
+
+          <section>
+            <div className="rating">
+              <StarRating maxRating={10} size={24} />
+            </div>
+            <p>
+              <em>{plot}</em>
+            </p>
+            <p>Starring {actors}</p>
+            <p>Directed by {director}</p>
+          </section>
+          {/* {selectedID} */}
+        </>
+      )}
     </div>
   );
 }
