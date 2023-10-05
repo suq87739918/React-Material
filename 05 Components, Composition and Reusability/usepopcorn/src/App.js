@@ -427,6 +427,7 @@ function MovieDetails({
       if (!title) return;
       document.title = `Movie | ${title}`;
 
+      // 下面这个function是useEffect clean up function。
       return function () {
         document.title = `usePopcorn`;
       };
