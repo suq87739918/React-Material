@@ -1,4 +1,5 @@
 import { useState } from "react";
+import App from "./App";
 
 const containerStyle = {
   display: "flex",
@@ -18,12 +19,16 @@ function StarRating({
   className = "",
   message = [],
   defaultRating = 0,
+  onSetRating,
 }) {
   const [rating, setRating] = useState(defaultRating);
   const [tempRating, setTempRating] = useState(0);
 
   function handleRating(rating) {
     setRating(rating);
+    if (onSetRating) {
+      onSetRating(rating);
+    }
   }
 
   const textStyle = {
