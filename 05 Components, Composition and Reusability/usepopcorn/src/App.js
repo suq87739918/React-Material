@@ -8,11 +8,16 @@ const KEY = "d4b9e1cb";
 
 export default function App() {
   const [movies, setMovies] = useState([]);
-  const [watched, setWatched] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const [query, setQuery] = useState("inception");
   const [selectedID, setSelectedID] = useState(null);
+  // const [watched, setWatched] = useState([]);
+  // useState hook也可以接收一个function的结果来作为它的initial value
+  const [watched, setWatched] = useState(function () {
+    const storedValue = localStorage.getItem("watched");
+    return JSON.parse(storedValue);
+  });
 
   function handleSelectMovie(id) {
     return setSelectedID((setSelectedID) => (id === selectedID ? null : id));
@@ -24,6 +29,8 @@ export default function App() {
 
   function handleWatchedMovie(movie) {
     return setWatched((watched) => [...watched, movie]);
+
+    // localStorage.setItem("watched", JSON.stringify([...watched, movie]));
   }
 
   function handleModifyMovie(updatedMovie) {
@@ -39,6 +46,14 @@ export default function App() {
       watched.filter((movie) => movie.imdbID !== id)
     );
   }
+
+  useEffect(
+    function () {
+      // localStorage只能存储一些key : value的pair，所以需要在创建时定义他们的key和value
+      localStorage.setItem("watched", JSON.stringify(watched));
+    },
+    [watched]
+  );
 
   useEffect(
     function () {
@@ -267,6 +282,25 @@ function MovieDetails({
     Director: director,
     Genre: genre,
   } = movie;
+
+  // 这个会报错，因为react hooks仅可以在top level中被调用，不能在condition中被调用
+  // if (StarRating > 8) {
+  //   const [isTop, setIsTop] = useState(true);
+  // }
+
+  // 这个是early return的情况，这个可能导致之后的react hook没有被成功render，比如下面的useEffect在这个情况下就不会被render
+  // if (StarRating > 8) {
+  //   return <p>grestest ever!</p>;
+  // }
+
+  //这个会返回false，即便选择的imdbRating是大于8的，因为在useState中，这个判断是initial state，仅在application first mount的时候被判断，application在first mount的时候imdbRating是undefined，所以结果是false
+  // const [isTop, setIsTop] = useState(imdbRating > 8);
+  // console.log(isTop);
+  //要解决这个问题可以用useEffect，在dependency中设置re-render的条件
+  // useEffect(function(){
+  //   setIsTop(imdbRating > 8)
+  // },[imdbRating])
+  //这样，每次imdbRating变化的时候，useEffect都会被触发，然后call setIsTop来update最新的imdbRating来判断
 
   function handleAdd() {
     const newWatchedMovie = {
