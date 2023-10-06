@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import StarRating from "./StarRating";
 
 const average = (arr) =>
@@ -18,6 +18,13 @@ export default function App() {
     const storedValue = localStorage.getItem("watched");
     return JSON.parse(storedValue);
   });
+
+  // const [count, setCount] = useState(() => localStorage.getItem("items"))
+  // 和
+  // const [count, setCount] = useState(localStorage.getItem("items"))
+  // 的比较
+  // 第一个useState中用了一个callback function，那么这个function只有在application first mount的时候被渲染
+  // 但是第二个useState中没有使用callback function，所以每次组建被渲染的时候都会去读取localStorage的内容，这是不必要的
 
   function handleSelectMovie(id) {
     return setSelectedID((setSelectedID) => (id === selectedID ? null : id));
@@ -158,6 +165,36 @@ function Logo() {
 }
 
 function Search({ query, setQuery }) {
+  //让focus在每次页面被渲染的时候保持在search bar
+  //但是这种做法不是很好，因为使用react框架是为了避免在选择DOM的时候使用document.querySelector
+  //这里更好的方法是使用useRef()
+  // useEffect(function () {
+  //   const el = document.querySelector(".search");
+  //   el.focus();
+  // }, []);
+
+  const inputEl = useRef(null); //一般在处理DOM的时候可以选择为null
+  useEffect(function () {
+    function callback(e) {
+      //如果当前激活的内容和inputEL当先选中的一样，那么直接结束逻辑，什么也不做，这个情况即选中search bar的情况下去focus search bar
+      if (document.activeElement === inputEl.current) {
+        return;
+      }
+      if (e.code === "Enter") {
+        inputEl.current.focus();
+        setQuery("");
+      }
+    }
+    document.addEventListener("keydown", callback);
+    return () => document.removeEventListener("keydown", callback);
+  }, []);
+
+  // useRef: useRef 返回一个可变的 ref 对象，其 .current 属性被初始化为传递给它的参数（null 在这里）。返回的对象在组件的整个生命周期内保持不变。
+  // useEffect: useEffect 可以让你执行副作用操作。当你传递一个空的依赖数组 [] 时，它只会在组件初次渲染后执行一次。
+
+  // const inputEl = useRef(null); 创建了一个 ref 对象，其 .current 属性被初始化为 null。这是一个常见的模式，首先将 ref 初始化为 null，然后将其附加到某个 DOM 元素上。
+  // inputEl.current.focus(); 这行代码的作用是将焦点设置到 input 元素上。当你的组件首次渲染后，由于 useEffect 的空依赖数组，这段代码会执行，从而自动将焦点放在 input 上。
+  // ref={inputEl}: 这里，你将 inputEl ref 附加到 input DOM 元素上。这意味着，在此之后，你可以通过 inputEl.current 访问实际的 input DOM 节点，并对其进行操作（例如设置焦点）。
   return (
     <input
       className="search"
@@ -165,6 +202,7 @@ function Search({ query, setQuery }) {
       placeholder="Search movies..."
       value={query}
       onChange={(e) => setQuery(e.target.value)}
+      ref={inputEl} //这个的作用是让useRef附加在input中
     />
   );
 }
@@ -263,6 +301,19 @@ function MovieDetails({
   const [isLoading, setIsLoading] = useState(false);
   const [userRating, setUserRating] = useState("");
 
+  const countRef = useRef(0);
+
+  //when userRating change, re-render this part
+  useEffect(
+    function () {
+      //check if userRating exist，否则useEffect会在application first mount的时候render,所以这个countRef会从1开始
+      if (userRating) {
+        countRef.current++;
+      }
+    },
+    [userRating]
+  );
+
   const isWatched = watched.map((movie) => movie.imdbID).includes(selectedID);
   console.log(isWatched);
 
@@ -311,6 +362,7 @@ function MovieDetails({
       poster,
       runtime: Number(runtime.split(" ").at(0)),
       userRating,
+      countRatingDecision: countRef.current,
     };
 
     onAddWatched(newWatchedMovie);

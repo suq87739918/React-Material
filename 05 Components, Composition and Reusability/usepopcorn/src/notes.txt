@@ -10,3 +10,13 @@ useEffect(fn, []):
 useEffect(fn):
     Effect will synchronized on everything.
     run on every render, which is bad
+
+
+
+useRef():
+    is mutable, current property that is presisted across renders, 也就意味着即使application重新render，useRef的内容也不会改变
+    Two big usecases:
+        1. Creating a variable that stays the same between renders
+        2. select DOM element
+    Refs are for data that is not rendered, usually only appear in event handlers or effect, not in JSX(use useState otherwise)
+    Not allowed to read or write in the render logic
