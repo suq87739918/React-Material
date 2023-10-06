@@ -1,6 +1,53 @@
 import { useEffect, useState } from "react";
 import StarRating from "./StarRating";
 
+const tempMovieData = [
+  {
+    imdbID: "tt1375666",
+    Title: "Inception",
+    Year: "2010",
+    Poster:
+      "https://m.media-amazon.com/images/M/MV5BMjAxMzY3NjcxNF5BMl5BanBnXkFtZTcwNTI5OTM0Mw@@._V1_SX300.jpg",
+  },
+  {
+    imdbID: "tt0133093",
+    Title: "The Matrix",
+    Year: "1999",
+    Poster:
+      "https://m.media-amazon.com/images/M/MV5BNzQzOTk3OTAtNDQ0Zi00ZTVkLWI0MTEtMDllZjNkYzNjNTc4L2ltYWdlXkEyXkFqcGdeQXVyNjU0OTQ0OTY@._V1_SX300.jpg",
+  },
+  {
+    imdbID: "tt6751668",
+    Title: "Parasite",
+    Year: "2019",
+    Poster:
+      "https://m.media-amazon.com/images/M/MV5BYWZjMjk3ZTItODQ2ZC00NTY5LWE0ZDYtZTI3MjcwN2Q5NTVkXkEyXkFqcGdeQXVyODk4OTc3MTY@._V1_SX300.jpg",
+  },
+];
+
+const tempWatchedData = [
+  {
+    imdbID: "tt1375666",
+    Title: "Inception",
+    Year: "2010",
+    Poster:
+      "https://m.media-amazon.com/images/M/MV5BMjAxMzY3NjcxNF5BMl5BanBnXkFtZTcwNTI5OTM0Mw@@._V1_SX300.jpg",
+    runtime: 148,
+    imdbRating: 8.8,
+    userRating: 10,
+  },
+  {
+    imdbID: "tt0088763",
+    Title: "Back to the Future",
+    Year: "1985",
+    Poster:
+      "https://m.media-amazon.com/images/M/MV5BZmU0M2Y1OGUtZjIxNi00ZjBkLTg1MjgtOWIyNThiZWIwYjRiXkEyXkFqcGdeQXVyMTQxNzMzNDI@._V1_SX300.jpg",
+    runtime: 116,
+    imdbRating: 8.5,
+    userRating: 9,
+  },
+];
+
 const average = (arr) =>
   arr.reduce((acc, cur, i, arr) => acc + cur / arr.length, 0);
 
@@ -13,6 +60,20 @@ export default function App() {
   const [error, setError] = useState("");
   const [query, setQuery] = useState("inception");
   const [selectedID, setSelectedID] = useState(null);
+
+  // fetch直接写在会有state change的地方是不允许的，因为fetch会触发state change，然后整个function会rerender，然后fetch又会触发state change，这就是infinite loop了
+  // 为了避免这个情况，需要把这部分写在useEffect下
+  // fetch(`http://www.omdbapi.com/?apikey=${KEY}&s=interstellar`)
+  //   .then((res) => res.json())
+  //   .then((data) => console.log(data));
+
+  // 第一种写法 使用链式 .then() 方法处理 fetch 返回的 Promise。
+  // 第二种写法 使用了 async/await 语法来处理 Promise, 使用 async/await 时，你可以使用标准的 try/catch 语句来捕获错误，这使得错误处理更加直观。如果你有多个依赖于先前结果的异步操作，使用 async/await 可以帮助你避免深层嵌套的 .then() 结构，也称为 "回调地狱"。
+  // useEffect(function () {
+  //   fetch(`http://www.omdbapi.com/?apikey=${KEY}&s=interstellar`)
+  //     .then((res) => res.json())
+  //     .then((data) => setMovies(data.Search));
+  // }, []);
 
   function handleSelectMovie(id) {
     return setSelectedID((setSelectedID) => (id === selectedID ? null : id));
@@ -59,6 +120,7 @@ export default function App() {
           console.error(err.message);
           setError(err.message);
         } finally {
+          // finally会在结尾处运行，不论是否有error
           setIsLoading(false);
         }
       }
@@ -80,7 +142,18 @@ export default function App() {
         <NumResult movies={movies} />
       </NavBar>
       <Main>
+        {/* <ElementBox element={<MovieList movies={movies} />} />
+        <ElementBox
+          element={
+            <div>
+              <WatchedSummary watched={watched} />
+              <WatchedList watched={watched} />
+            </div>
+          }
+        /> */}
+        {/* 用一个可重复利用的Box来render两个不用的box，内容用children传递 */}
         <Box>
+          {/* {isLoading ? <Loader></Loader> : <MovieList movies={movies} />} */}
           {isLoading && <Loader />}
           {!isLoading && !error && (
             <MovieList movies={movies} onSelectMovie={handleSelectMovie} />
@@ -169,6 +242,41 @@ function Box({ children }) {
     </div>
   );
 }
+
+// 传递值用element方法而不是children方法
+// function ElementBox({ element }) {
+//   const [isOpen, setIsOpen] = useState(true);
+//   return (
+//     <div className="box">
+//       <button className="btn-toggle" onClick={() => setIsOpen((open) => !open)}>
+//         {isOpen ? "–" : "+"}
+//       </button>
+//       {isOpen && element}
+//     </div>
+//   );
+// }
+
+// function WatchedBox() {
+//   const [watched, setWatched] = useState(tempWatchedData);
+//   const [isOpen2, setIsOpen2] = useState(true);
+
+//   return (
+//     <div className="box">
+//       <button
+//         className="btn-toggle"
+//         onClick={() => setIsOpen2((open) => !open)}
+//       >
+//         {isOpen2 ? "–" : "+"}
+//       </button>
+//       {isOpen2 && (
+//         <>
+//           <WatchedSummary watched={watched} />
+//           <WatchedList watched={watched} />
+//         </>
+//       )}
+//     </div>
+//   );
+// }
 
 function MovieList({ movies, onSelectMovie }) {
   return (
@@ -319,6 +427,7 @@ function MovieDetails({
       if (!title) return;
       document.title = `Movie | ${title}`;
 
+      // 下面这个function是useEffect clean up function。
       return function () {
         document.title = `usePopcorn`;
       };
@@ -392,6 +501,7 @@ function MovieDetails({
             <p>Starring {actors}</p>
             <p>Directed by {director}</p>
           </section>
+          {/* {selectedID} */}
         </>
       )}
     </div>
@@ -417,6 +527,7 @@ function WatchedMovieList({ movie, onDelete }) {
           <span>{movie.runtime} min</span>
         </p>
 
+        {/* 直接使用 onClick={onDelete}的情况下onDelete没有接收到需要的参数，使用 onClick={onDelete(movie.imdbID)}情况下，onDelete会被立刻执行，而不是等待点击 */}
         <button className="btn-delete" onClick={() => onDelete(movie.imdbID)}>
           X
         </button>

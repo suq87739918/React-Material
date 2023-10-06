@@ -1,5 +1,5 @@
 import { useState } from "react";
-import App from "./App";
+import App from "./App-V2";
 
 const containerStyle = {
   display: "flex",
