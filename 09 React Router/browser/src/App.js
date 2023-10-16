@@ -2,6 +2,7 @@ import HomePage from "./pages/HomePage";
 import Pricing from "./pages/Pricing";
 import Product from "./pages/Product";
 import PageNotFound from "./pages/PageNotFound";
+import AppLayout from "./pages/AppLayout";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 
 function App() {
@@ -14,6 +15,7 @@ function App() {
           <Route path="/Pricing" element={<Pricing />} />
           <Route path="/Product" element={<Product />} />
           <Route path="/*" element={<PageNotFound />} />
+          <Route path="/app" element={<AppLayout />} />
         </Routes>
       </BrowserRouter>
     </div>
