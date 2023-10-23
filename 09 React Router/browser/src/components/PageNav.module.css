@@ -1,8 +1,0 @@
-.nav {
-  background-color: antiquewhite;
-}
-.nav ul {
-  display: flex;
-  justify-content: space-between;
-  list-style: none;
-}
