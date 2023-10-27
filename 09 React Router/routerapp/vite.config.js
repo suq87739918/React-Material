@@ -5,4 +5,10 @@ import eslint from "vite-plugin-eslint";
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [react(), eslint()],
+  css: {
+    modules: {
+      // 使用原始的类名，不添加任何散列
+      generateScopedName: "[local]",
+    },
+  },
 });
